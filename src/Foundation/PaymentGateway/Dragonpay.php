@@ -377,8 +377,15 @@ class Dragonpay implements PaymentGatewayInterface
             $soap_adapter = $soap_adapter->initialize($webservice_url);
         }
 
-        Log::info('(Dragonpay GetToken) __getLastRequestHeaders: \n'.$soap_adapter->__getLastRequestHeaders());
-        Log::info('(Dragonpay GetToken) __getLastRequest: \n'.$soap_adapter->__getLastRequest());
+        $domData = new \DOMDocument('1.0');
+        $domData->preserveWhiteSpace = true;
+        $domData->formatOutput = true;
+        $domData->loadXML($soap_adapter->__getLastRequest());
+        $soapXmlData = $domData->saveXML($domData);
+
+        Log::info('(Dragonpay SOAP GetToken) __getLastRequestHeaders: \n'.
+            $soap_adapter->__getLastRequestHeaders());
+        Log::info('(Dragonpay SOAP GetToken) __getLastRequest: \n'.$soapXmlData);
 
 		$token = $soap_adapter->GetTxnToken($parameters);
         
