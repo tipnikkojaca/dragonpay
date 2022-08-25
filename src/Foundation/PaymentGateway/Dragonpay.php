@@ -11,6 +11,7 @@
 
 namespace Crazymeeks\Foundation\PaymentGateway;
 
+use Illuminate\Support\Facades\Log;
 use Ixudra\Curl\CurlService;
 use Crazymeeks\Contracts\DigestInterface;
 use Crazymeeks\Contracts\PaymentGatewayInterface;
@@ -375,6 +376,9 @@ class Dragonpay implements PaymentGatewayInterface
             $soap_adapter = new SoapClientAdapter();
             $soap_adapter = $soap_adapter->initialize($webservice_url);
         }
+
+        Log::info('(Dragonpay GetToken) __getLastRequestHeaders: \n'.$soap_adapter->__getLastRequestHeaders());
+        Log::info('(Dragonpay GetToken) __getLastRequest: \n'.$soap_adapter->__getLastRequest());
 
 		$token = $soap_adapter->GetTxnToken($parameters);
         
