@@ -29,7 +29,7 @@ use Crazymeeks\Foundation\PaymentGateway\DragonPay\Action\ActionInterface;
 
 class Dragonpay implements PaymentGatewayInterface
 {
-
+    
     const INVALID_PAYMENT_GATEWAY_ID = 101;
     const INCORRECT_SECRET_KEY = 102;
     const INVALID_REFERENCE_NUMBER = 103;
@@ -44,7 +44,7 @@ class Dragonpay implements PaymentGatewayInterface
     const INVALID_MERCHANT_ID = 201;
     const INVALID_MERCHANT_PASSWORD = 202;
 
-
+    
     /**
      * PS Error Codes
      *
@@ -88,7 +88,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Payment Channels
-     *
+     * 
      * @var int
      */
     const ONLINE_BANK  = 1;
@@ -149,13 +149,13 @@ class Dragonpay implements PaymentGatewayInterface
          * through browser redirects which are visile to end-users. Instead,
          * parameters are exchanged directly between the Merchant site and
          * PS servers through SOAP calls.
-         *
+         * 
          * @var string
          */
         self::WS_SANDBOX_URL => 'https://test.dragonpay.ph' . self::WS_ENDPOINT,
         self::WS_PRODUCTION_URL => 'https://gw.dragonpay.ph' . self::WS_ENDPOINT,
     ];
-
+    
     /**
      * SOAP web service url
      *
@@ -165,7 +165,7 @@ class Dragonpay implements PaymentGatewayInterface
 
 	/**
 	 * Our digest type
-	 *
+	 * 
 	 * For Dragon Pay, it is sha1
 	 *
 	 * @var string
@@ -185,10 +185,10 @@ class Dragonpay implements PaymentGatewayInterface
 	 * @var \Crazymeeks\Foundation\PaymentGateway\RequestBag
 	 */
     public $request;
-
+    
     /**
      * The parameters
-     *
+     * 
      * @var \Crazymeeks\Foundation\PaymentGateway\Parameters
      *
      */
@@ -197,7 +197,7 @@ class Dragonpay implements PaymentGatewayInterface
     /**
 	 * The request token we pass after redirected
 	 * to dragonpay PS
-	 *
+	 * 
 	 * @var \Crazymeeks\Foundation\PaymentGateway\DragonPay\Token
 	 */
     public $token = null;
@@ -239,7 +239,7 @@ class Dragonpay implements PaymentGatewayInterface
      */
     private $curl;
 
-
+    
     /**
      * Client merchant account
      *
@@ -249,7 +249,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Constructor
-     *
+     * 
      * @param array $merchant_account
      * @param bool $sandbox
      * @param \Crazymeeks\Contracts\DigestInterface $digestor|null
@@ -271,7 +271,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Return internal properties for debugging purposes
-     *
+     * 
      * @see https://www.php.net/manual/en/language.oop5.magic.php#object.debuginfo
      *
      * @return array
@@ -292,7 +292,7 @@ class Dragonpay implements PaymentGatewayInterface
      * Set merchant account
      *
      * @param array $merchant_account
-     *
+     * 
      * @return $this
      */
     private function setMerchantAccount(array $merchant_account)
@@ -315,7 +315,7 @@ class Dragonpay implements PaymentGatewayInterface
     /**
      * Set Request Parameters
      * Alias of setRequestParameters
-     *
+     * 
      * @param array $parameters
      *
      * @return $this
@@ -324,12 +324,12 @@ class Dragonpay implements PaymentGatewayInterface
     {
         return $this->setRequestParameters($parameters);
     }
-
+    
     /**
      * Set Request parameters
      *
      * @param array $parameters
-     *
+     * 
      * @return $this
      */
     public function setRequestParameters(array $parameters)
@@ -343,7 +343,7 @@ class Dragonpay implements PaymentGatewayInterface
      * passing "procid" in the parameters
      *
      * @param string $procid     The valid procid
-     *
+     * 
      * @return $this
      */
     public function withProcid($procid)
@@ -357,19 +357,19 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * When using SOAP/XML Web Service Model
-     *
+     * 
      * @param array $parameters
      * @param null|\Crazymeeks\Foundation\Adapter\SoapClientAdapter $soap_adapter
-     *
+     * 
      * @return \Crazymeeks\Foundation\PaymentGateway\DragonPay\Token
-     *
+     * 
      * @throws \Exception
      */
     public function getToken(array $parameters, SoapClientAdapter $soap_adapter = null)
     {
-
+        
         $parameters = $this->parameters->prepareRequestTokenParameters($parameters);
-
+        
         $webservice_url = $this->getWebserviceUrl();
 
         if (is_null($soap_adapter)) {
@@ -388,9 +388,9 @@ class Dragonpay implements PaymentGatewayInterface
         Log::info('(Dragonpay SOAP GetToken) __getLastRequest: \n'.$soapXmlData);
 
 		$token = $soap_adapter->GetTxnToken($parameters);
-
+        
         $code = $token->GetTxnTokenResult;
-
+        
 		if (array_key_exists($code, $this->error_codes)) {
             $this->throwException($code);
         }
@@ -404,11 +404,11 @@ class Dragonpay implements PaymentGatewayInterface
      * Throw exception
      *
      * @param int $code
-     *
+     * 
      * @return void
      */
     private function throwException($code)
-    {
+    {  
         $this->setDebugMessage($this->error_codes[$code]);
         $exception = "Crazymeeks\Foundation\Exceptions\\" . $this->getExceptionClass($code);
         throw new $exception($this->seeError());
@@ -419,7 +419,7 @@ class Dragonpay implements PaymentGatewayInterface
      * that was previously returned by PS
      *
      * @param int $code
-     *
+     * 
      * @return string
      */
     private function getExceptionClass($code)
@@ -449,41 +449,41 @@ class Dragonpay implements PaymentGatewayInterface
      * @param array $parameters
      * @param \Crazymeeks\Foundation\PaymentGateway\BillingInfoVerifier|null $verifier
      * @param \Crazymeeks\Foundation\Adapter\SoapClientAdapter|null $soap
-     *
+     * 
      * @return $this
      */
     public function useCreditCard(array $parameters, BillingInfoVerifier $verifier = null, SoapClientAdapter $soap = null)
     {
-
+        
         $this->setParameters($parameters);
 
         $this->parameters->setBillingInfoParameters($parameters);
-
+        
 		$this->filterPaymentChannel(Dragonpay::CREDIT_CARD);
 
         $url = $this->getBillingInfoUrl();
-
+        
         if (is_null($verifier)) {
             $verifier = new BillingInfoVerifier();
         }
         if (is_null($soap)) {
             $soap = new SoapClientAdapter();
         }
-
+        
         $verifier->setParameterObject($this->parameters);
 
         $verifier->send($soap, $url);
-
+        
 		return $this;
     }
 
     /**
      * Set PS billing info url.
-     *
+     * 
      * Billing info is used when using Credit Card
      *
      * @param string $url
-     *
+     * 
      * @return $this
      */
     public function setBillingInfoUrl($url)
@@ -507,7 +507,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Filter Payment Channel
-     *
+     * 
      * @param int $channel
      *
      * @return $this
@@ -533,7 +533,7 @@ class Dragonpay implements PaymentGatewayInterface
      * Set the debug message for debugging
      *
      * @param string $message
-     *
+     * 
      * @return void
      */
     public function setDebugMessage($message)
@@ -556,7 +556,7 @@ class Dragonpay implements PaymentGatewayInterface
      * Set web service url for SOAP/XML model
      *
      * @param string $url
-     *
+     * 
      * @return $this
      */
     public function setWebServiceUrl($url)
@@ -603,7 +603,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Set payment url
-     *
+     * 
      * @param string $url
      *
      * @return $this
@@ -620,7 +620,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Get payment mode
-     *
+     * 
      * @return string
      */
     public function getPaymentMode()
@@ -630,7 +630,7 @@ class Dragonpay implements PaymentGatewayInterface
 
     /**
      * Redirect to Dragonpay Payment page
-     *
+     * 
      * @param bool $test   Weather we are running thru unit test
      *
      * @return mixed
@@ -638,17 +638,17 @@ class Dragonpay implements PaymentGatewayInterface
     public function away($test = false)
     {
         if ($test) {
-            return $this->getUrl() . '?' . $this->parameters->query();
+            return $this->getUrl() . '?' . $this->parameters->query();   
         }
         header("Location: " . $this->getUrl() . '?' . $this->parameters->query(), 302);exit();
     }
 
     /**
      * Postback handler
-     *
+     * 
      * @param \Crazymeeks\Foundation\PaymentGateway\Handler\PostbackHandlerInterface|\Closure $callback
      * @param array $postData
-     *
+     * 
      * @return mixed
      */
     public function handlePostback($callback, array $postData)
@@ -672,11 +672,11 @@ class Dragonpay implements PaymentGatewayInterface
      * Create postback response
      *
      * @param string $status
-     *
+     * 
      * @return string
-     *
+     * 
      * @throws \Crazymeeks\Foundation\Exceptions\InvalidPostbackInvokerException
-     *
+     * 
      */
     private function getStatusDescription($status)
     {
@@ -692,7 +692,7 @@ class Dragonpay implements PaymentGatewayInterface
      *
      * @param mixed $amount
      * @param \Crazymeeks\Foundation\Adapter\SoapClientAdapter|null $soap_adapter
-     *
+     * 
      * @return mixed
      */
     public function getPaymentChannels($amount = self::ALL_PROCESSORS, SoapClientAdapter $soap_adapter = null)
@@ -716,7 +716,7 @@ class Dragonpay implements PaymentGatewayInterface
         $processors = $soap_adapter->GetAvailableProcessors($parameters);
 
         if (property_exists($processors, 'GetAvailableProcessorsResult')) {
-
+            
             return $processors->GetAvailableProcessorsResult->ProcessorInfo;
 
         }
@@ -728,7 +728,7 @@ class Dragonpay implements PaymentGatewayInterface
      * Filter parameters required by DP's GetAvailableProcessors() method
      *
      * @param array $parameters
-     *
+     * 
      * @return array
      */
     private function filterAvailableProcessorsParameters(array $parameters)
@@ -746,7 +746,7 @@ class Dragonpay implements PaymentGatewayInterface
      *
      * @param ActionInterface $action
      * @param \Ixudra\Curl\CurlService $curl
-     *
+     * 
      * @return mixed
      */
     public function action(ActionInterface $action, CurlService $curl = null)
@@ -758,7 +758,7 @@ class Dragonpay implements PaymentGatewayInterface
      * Get payment payment url of either sandbox or production
      *
      * @param string $modeType   i.e 'sandbox|production'
-     *
+     * 
      * @return string
      */
     public function getBaseUrlOf(string $modeType)
